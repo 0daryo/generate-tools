@@ -9,11 +9,13 @@ import (
 	"go/token"
 	"html/template"
 	"io/ioutil"
+	"strings"
 )
 
 type Prop struct {
-	Name string
-	T    string
+	Name      string
+	LowerName string
+	T         string
 }
 
 type Props []*Prop
@@ -21,6 +23,7 @@ type Props []*Prop
 type StructInfo struct {
 	Name  string
 	Props Props
+	Args  string
 }
 
 var (
@@ -41,7 +44,7 @@ func generateModel(filePath string) error {
 	if err != nil {
 		return err
 	}
-	props := make([]*Prop, 0)
+	props := make(Props, 0)
 	var typeName string
 	ast.Inspect(f, func(n ast.Node) bool {
 		switch x := n.(type) {
@@ -58,8 +61,9 @@ func generateModel(filePath string) error {
 							tp = i.Name
 						}
 						props = append(props, &Prop{
-							Name: name,
-							T:    tp,
+							Name:      name,
+							LowerName: fmt.Sprintf("%s%s", strings.ToLower(string(name[0])), name[1:]),
+							T:         tp,
 						})
 					}
 				}
@@ -81,6 +85,7 @@ func generateModel(filePath string) error {
 		&StructInfo{
 			Name:  typeName,
 			Props: props,
+			Args:  props.genArgs(),
 		},
 	}
 	o := new(bytes.Buffer)
@@ -92,4 +97,24 @@ func generateModel(filePath string) error {
 	}
 	fmt.Println("finished")
 	return nil
+}
+
+func (ps Props) genArgs() string {
+	if len(ps) < 2 {
+		return fmt.Sprintf("%s %s,", ps[0].Name, ps[0].T)
+	}
+	nextT := ps[1].T
+	sb := strings.Builder{}
+	for i, p := range ps {
+		sb.WriteString(p.Name)
+		if p.T != nextT || i == len(ps)-1 {
+			sb.WriteString(" ")
+			sb.WriteString(p.T)
+		}
+		sb.WriteString(", ")
+		if i < len(ps)-1 {
+			nextT = ps[i+1].T
+		}
+	}
+	return sb.String()
 }
