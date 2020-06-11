@@ -101,12 +101,12 @@ func generateModel(filePath string) error {
 
 func (ps Props) genArgs() string {
 	if len(ps) < 2 {
-		return fmt.Sprintf("%s %s,", ps[0].Name, ps[0].T)
+		return fmt.Sprintf("%s %s,", ps[0].LowerName, ps[0].T)
 	}
 	nextT := ps[1].T
 	sb := strings.Builder{}
 	for i, p := range ps {
-		sb.WriteString(p.Name)
+		sb.WriteString(p.LowerName)
 		if p.T != nextT || i == len(ps)-1 {
 			sb.WriteString(" ")
 			sb.WriteString(p.T)
