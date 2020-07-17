@@ -3,6 +3,7 @@ package main
 var tpl = `
 {{- $gStructInfo := .StructInfo }}
 {{- $gStructName := $gStructInfo.Name }}
+{{- $gStructLName := $gStructInfo.LowerName }}
 package model
 
 type {{$gStructName}} model { {{ range $i, $v := $gStructInfo.Props }}
@@ -15,5 +16,19 @@ func New{{$gStructName}}( {{ $gStructInfo.Args }}
 		{{ $v.Name }}: {{ $v.LowerName }},{{ end }}
 	}
 	return m, nil
+}
+
+func (o *{{$gStructName}}) toParam()*{{$gStructLName}}{
+		p := &{{$gStructLName}} { {{ range $i, $v := $gStructInfo.Props }}
+			{{ $v.Name }}: o.{{ $v.Name }},{{ end }}
+		}
+	return p
+}
+
+func New{{$gStructName}}(o *{{$gStructLName}})*{{$gStructName}}{
+	p := &{{$gStructName}} { {{ range $i, $v := $gStructInfo.Props }}
+		{{ $v.Name }}: o.{{ $v.Name }},{{ end }}
+	}
+return p
 }
 `

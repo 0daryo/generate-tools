@@ -21,9 +21,10 @@ type Prop struct {
 type Props []*Prop
 
 type StructInfo struct {
-	Name  string
-	Props Props
-	Args  string
+	Name      string
+	LowerName string
+	Props     Props
+	Args      string
 }
 
 var (
@@ -83,9 +84,10 @@ func generateModel(filePath string) error {
 		StructInfo *StructInfo
 	}{
 		&StructInfo{
-			Name:  typeName,
-			Props: props,
-			Args:  props.genArgs(),
+			Name:      typeName,
+			LowerName: fmt.Sprintf("%s%s", strings.ToLower(string(typeName[0])), typeName[1:]),
+			Props:     props,
+			Args:      props.genArgs(),
 		},
 	}
 	o := new(bytes.Buffer)
