@@ -7,15 +7,46 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
-	"html/template"
+	"text/template"
 	"io/ioutil"
+	"math/rand"
+	"strconv"
 	"strings"
+	"time"
 )
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
+
+var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+func randString(n int) string {
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(b)
+}
 
 type Prop struct {
 	Name      string
 	LowerName string
 	T         string
+	Fake      string
+}
+
+func (p *Prop) faker() {
+	switch p.T {
+	case "string":
+		p.Fake = fmt.Sprintf("\"%s\"", randString(10))
+	case "int", "int32", "int64":
+		p.Fake = strconv.FormatInt(int64(rand.Intn(10)), 10)
+	case "bool":
+		p.Fake = "true"
+	default:
+		p.Fake = fmt.Sprintf("%s{}", p.T)
+	}
 }
 
 type Props []*Prop
@@ -61,11 +92,13 @@ func generateModel(filePath string) error {
 						if i, ok := fi.Type.(*ast.Ident); ok {
 							tp = i.Name
 						}
-						props = append(props, &Prop{
+						prop := &Prop{
 							Name:      name,
 							LowerName: fmt.Sprintf("%s%s", strings.ToLower(string(name[0])), name[1:]),
 							T:         tp,
-						})
+						}
+						prop.faker()
+						props = append(props, prop)
 					}
 				}
 			}

@@ -25,9 +25,16 @@ func (o *{{$gStructName}}) toParam()*{{$gStructLName}}{
 	return p
 }
 
-func New{{$gStructName}}(o *{{$gStructLName}})*{{$gStructName}}{
+func new{{$gStructName}}(o *{{$gStructLName}})*{{$gStructName}}{
 	p := &{{$gStructName}} { {{ range $i, $v := $gStructInfo.Props }}
 		{{ $v.Name }}: o.{{ $v.Name }},{{ end }}
+	}
+return p
+}
+
+func fake{{$gStructName}}()*{{$gStructName}}{
+	p := &{{$gStructName}} { {{ range $i, $v := $gStructInfo.Props }}
+		{{ $v.Name }}: {{ $v.Fake }},{{ end }}
 	}
 return p
 }
