@@ -7,16 +7,20 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
-	"text/template"
 	"io/ioutil"
 	"math/rand"
 	"strconv"
 	"strings"
+	"text/template"
 	"time"
 )
 
 func init() {
 	rand.Seed(time.Now().UnixNano())
+}
+
+var uniqueMap = map[string]string{
+	"ID": "id",
 }
 
 var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
@@ -38,9 +42,9 @@ type Prop struct {
 
 func (p *Prop) faker() {
 	switch p.T {
-	case "string":
+	case "string", "*string":
 		p.Fake = fmt.Sprintf("\"%s\"", randString(10))
-	case "int", "int32", "int64":
+	case "int", "int32", "int64", "*int", "*int32", "*int64":
 		p.Fake = strconv.FormatInt(int64(rand.Intn(10)), 10)
 	case "bool":
 		p.Fake = "true"
@@ -76,6 +80,10 @@ func generateModel(filePath string) error {
 	if err != nil {
 		return err
 	}
+	for _, d := range f.Decls {
+		ast.Print(fset, d)
+		fmt.Println() // \n したい...
+	}
 	props := make(Props, 0)
 	var typeName string
 	ast.Inspect(f, func(n ast.Node) bool {
@@ -92,10 +100,22 @@ func generateModel(filePath string) error {
 						if i, ok := fi.Type.(*ast.Ident); ok {
 							tp = i.Name
 						}
+						if se, ok := fi.Type.(*ast.StarExpr); ok {
+							if i, ok := se.X.(*ast.Ident); ok {
+								tp = fmt.Sprintf("*%s", i.Name)
+							}
+						}
 						prop := &Prop{
-							Name:      name,
-							LowerName: fmt.Sprintf("%s%s", strings.ToLower(string(name[0])), name[1:]),
-							T:         tp,
+							Name: name,
+							LowerName: func() string {
+								for k, v := range uniqueMap {
+									if name == k {
+										return v
+									}
+								}
+								return fmt.Sprintf("%s%s", strings.ToLower(string(name[0])), name[1:])
+							}(),
+							T: tp,
 						}
 						prop.faker()
 						props = append(props, prop)
@@ -127,7 +147,11 @@ func generateModel(filePath string) error {
 	if err := t.Execute(o, si); err != nil {
 		return err
 	}
-	if err := ioutil.WriteFile("dest/output.go", o.Bytes(), 0644); err != nil {
+	// formatted, err := format.Source(o.Bytes())
+	// if err != nil {
+	// 	return err
+	// }
+	if err := ioutil.WriteFile("dest/_output.go", o.Bytes(), 0644); err != nil {
 		return err
 	}
 	fmt.Println("finished")
@@ -140,15 +164,19 @@ func (ps Props) genArgs() string {
 	}
 	nextT := ps[1].T
 	sb := strings.Builder{}
+	sb.WriteString("\n")
 	for i, p := range ps {
+		if i < len(ps)-1 {
+			nextT = ps[i+1].T
+		}
 		sb.WriteString(p.LowerName)
 		if p.T != nextT || i == len(ps)-1 {
 			sb.WriteString(" ")
 			sb.WriteString(p.T)
 		}
-		sb.WriteString(", ")
-		if i < len(ps)-1 {
-			nextT = ps[i+1].T
+		sb.WriteString(",")
+		if i != len(ps)-1 {
+			sb.WriteString("\n")
 		}
 	}
 	return sb.String()
