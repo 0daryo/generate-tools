@@ -7,7 +7,7 @@ var tpl = `
 package dest
 
 type {{$gStructName}} struct { {{ range $i, $v := $gStructInfo.Props }}
-	{{ $v.Name }} {{ $v.T }}{{ end }}
+	{{ $v.Name }} {{ $v.T }}'xml:"{{ $v.LowerName }}"'{{ end }}
 }
 {{ $lastType := "notType" }}
 func New{{$gStructName}}( {{ $gStructInfo.Args }}
@@ -19,6 +19,27 @@ func New{{$gStructName}}( {{ $gStructInfo.Args }}
 		return nil, err
 	}
 	return m, nil
+}
+
+func (o *{{$gStructName}}) toParam()*{{$gStructLName}}{
+	p := &{{$gStructLName}} { {{ range $i, $v := $gStructInfo.Props }}
+		{{ $v.Name }}: o.{{ $v.Name }},{{ end }}
+	}
+return p
+}
+
+func new{{$gStructName}}(o *{{$gStructLName}})*{{$gStructName}}{
+p := &{{$gStructName}} { {{ range $i, $v := $gStructInfo.Props }}
+	{{ $v.Name }}: o.{{ $v.Name }},{{ end }}
+}
+return p
+}
+
+func fake{{$gStructName}}()*{{$gStructName}}{
+p := &{{$gStructName}} { {{ range $i, $v := $gStructInfo.Props }}
+	{{ $v.Name }}: {{ $v.Fake }},{{ end }}
+}
+return p
 }
 `
 
