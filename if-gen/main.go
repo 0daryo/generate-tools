@@ -8,6 +8,8 @@ import (
 	"os"
 	"strings"
 	"text/template"
+
+	"github.com/c-bata/go-prompt"
 )
 
 const (
@@ -15,6 +17,7 @@ const (
 )
 
 type Info struct {
+	PKGName    string
 	IFName     string
 	StructName string
 	Funcs      []Func
@@ -40,8 +43,9 @@ var sc = bufio.NewScanner(os.Stdin)
 
 func main() {
 	info := Info{}
-	fmt.Printf("IFName: ")
-	ifName := read()
+	info.PKGName = prompt.Input("pkg name: ", pkgCompleter)
+	fmt.Printf("interface name: ")
+	ifName := prompt.Input("interface name: ", interfaceCompleter)
 	info.IFName = ifName
 	info.StructName = strings.ToLower(string(ifName[0])) + ifName[1:]
 	info.Funcs = funcs()
@@ -66,20 +70,17 @@ func read() string {
 func funcs() []Func {
 	funcs := make([]Func, 0)
 	for {
-		fmt.Printf("Function Name(if nothing type ! and enter): ")
-		funcName := read()
+		funcName := prompt.Input("Function Name(if nothing type ! and enter): ", funcCompleter)
 		if funcName == fin {
 			return funcs
 		}
 		args := make([]Arg, 0)
 		for {
-			fmt.Printf("Arg(if nothing type ! and enter): ")
-			arg := read()
+			arg := prompt.Input("Arg(if nothing type ! and enter): ", argCompleter)
 			if arg == fin {
 				break
 			}
-			fmt.Printf("Type: ")
-			t := read()
+			t := prompt.Input("Type: ", typeCompleter)
 			args = append(args, Arg{
 				Name:    arg,
 				ArgType: t,
@@ -87,13 +88,11 @@ func funcs() []Func {
 		}
 		rets := make([]Ret, 0)
 		for {
-			fmt.Printf("Return(if nothing type ! and enter): ")
-			ret := read()
+			ret := prompt.Input("Return(if nothing type ! and enter): ", retCompleter)
 			if ret == fin {
 				break
 			}
-			fmt.Printf("Type: ")
-			t := read()
+			t := prompt.Input("Type: ", typeCompleter)
 			rets = append(rets, Ret{
 				Name:    ret,
 				RetType: t,
@@ -105,4 +104,74 @@ func funcs() []Func {
 			Rets: rets,
 		})
 	}
+}
+
+func typeCompleter(in prompt.Document) []prompt.Suggest {
+	s := []prompt.Suggest{
+		{Text: "uint8"},
+		{Text: "uint16"},
+		{Text: "uint32"},
+		{Text: "uint64"},
+		{Text: "int8"},
+		{Text: "int16"},
+		{Text: "int32"},
+		{Text: "int64"},
+		{Text: "float32"},
+		{Text: "float64"},
+		{Text: "[]byte"},
+		{Text: "string"},
+		{Text: "bool"},
+		{Text: "error"},
+	}
+	return prompt.FilterHasPrefix(s, in.GetWordBeforeCursor(), true)
+}
+
+func argCompleter(in prompt.Document) []prompt.Suggest {
+	s := []prompt.Suggest{
+		{Text: "!"},
+		{Text: "id"},
+		{Text: "name"},
+		{Text: "age"},
+	}
+	return prompt.FilterHasPrefix(s, in.GetWordBeforeCursor(), true)
+}
+
+func retCompleter(in prompt.Document) []prompt.Suggest {
+	s := []prompt.Suggest{
+		{Text: "!"},
+		{Text: "err"},
+		{Text: "user"},
+	}
+	return prompt.FilterHasPrefix(s, in.GetWordBeforeCursor(), true)
+}
+
+func funcCompleter(in prompt.Document) []prompt.Suggest {
+	s := []prompt.Suggest{
+		{Text: "!"},
+		{Text: "List"},
+		{Text: "Get"},
+		{Text: "Create"},
+		{Text: "Update"},
+		{Text: "Delete"},
+	}
+	return prompt.FilterHasPrefix(s, in.GetWordBeforeCursor(), true)
+}
+
+func pkgCompleter(in prompt.Document) []prompt.Suggest {
+	s := []prompt.Suggest{
+		{Text: "service"},
+		{Text: "usecase"},
+		{Text: "handler"},
+		{Text: "repository"},
+	}
+	return prompt.FilterHasPrefix(s, in.GetWordBeforeCursor(), true)
+}
+
+func interfaceCompleter(in prompt.Document) []prompt.Suggest {
+	s := []prompt.Suggest{
+		{Text: "User"},
+		{Text: "Email"},
+		{Text: "Book"},
+	}
+	return prompt.FilterHasPrefix(s, in.GetWordBeforeCursor(), true)
 }
