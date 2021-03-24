@@ -41,6 +41,10 @@ p := &{{$gStructName}} { {{ range $i, $v := $gStructInfo.Props }}
 }
 return p
 }
+
+args
+{{ range $i, $v := $gStructInfo.Props }}
+	o.{{ $v.Name }},{{ end }}
 `
 
 var ParamTpl = `
@@ -63,4 +67,7 @@ p := &{{$gStructName}} { {{ range $i, $v := $gStructInfo.Props }}
 	{{ $v.Name }}: {{ $v.Fake }},{{ end }}
 }
 return p
-}`
+}
+`
+
+var a = "unused"
