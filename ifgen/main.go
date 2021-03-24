@@ -3,12 +3,13 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"flag"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 	"text/template"
 
+	"github.com/atotto/clipboard"
 	"github.com/c-bata/go-prompt"
 )
 
@@ -42,6 +43,10 @@ type Ret struct {
 var sc = bufio.NewScanner(os.Stdin)
 
 func main() {
+	var (
+		pbcopy = flag.Bool("c", false, "copy to clipboard")
+	)
+	flag.Parse()
 	info := Info{}
 	info.PKGName = prompt.Input("pkg name: ", pkgCompleter)
 	fmt.Printf("interface name: ")
@@ -57,9 +62,11 @@ func main() {
 	if err := t.Execute(o, info); err != nil {
 		panic(err)
 	}
-	if err := ioutil.WriteFile("dest/_output.go", o.Bytes(), 0644); err != nil {
-		panic(err)
+	if *pbcopy {
+		clipboard.WriteAll(o.String())
+		return
 	}
+	fmt.Fprint(os.Stdout, o)
 }
 
 func read() string {
@@ -108,6 +115,7 @@ func funcs() []Func {
 
 func typeCompleter(in prompt.Document) []prompt.Suggest {
 	s := []prompt.Suggest{
+		{Text: "context.Context"},
 		{Text: "uint8"},
 		{Text: "uint16"},
 		{Text: "uint32"},
@@ -121,6 +129,7 @@ func typeCompleter(in prompt.Document) []prompt.Suggest {
 		{Text: "[]byte"},
 		{Text: "string"},
 		{Text: "bool"},
+		{Text: "time.Time"},
 		{Text: "error"},
 	}
 	return prompt.FilterHasPrefix(s, in.GetWordBeforeCursor(), true)
@@ -129,6 +138,7 @@ func typeCompleter(in prompt.Document) []prompt.Suggest {
 func argCompleter(in prompt.Document) []prompt.Suggest {
 	s := []prompt.Suggest{
 		{Text: "!"},
+		{Text: "ctx"},
 		{Text: "id"},
 		{Text: "name"},
 		{Text: "age"},
