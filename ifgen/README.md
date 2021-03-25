@@ -12,3 +12,30 @@
 Usage of ifgen:
   -c    copy to clipboard
 ```
+
+## Output is like below
+```go
+package service
+
+type User interface {
+	Get(
+		userID string, 
+	) (
+		User User, 
+	)
+}
+
+type user struct{}
+
+func NewUser()*user {
+	return &user{}
+}
+
+func (s *user) Get(
+	userID string, 
+) (
+	User User, 
+) {
+	return
+}
+```
