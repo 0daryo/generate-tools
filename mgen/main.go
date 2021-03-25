@@ -142,5 +142,8 @@ func newTestVar(arg, t string) string {
 	case "time.Time":
 		return "time.Date(2020,time.August,11,22,33,44,55,time.UTC)"
 	}
-	return "15"
+	if strings.Contains(t, "int") {
+		return "15"
+	}
+	return t + "{}"
 }

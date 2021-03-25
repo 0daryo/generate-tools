@@ -27,6 +27,7 @@ Field(if nothing type ! and enter): !
 ```
 
 ```go
+
 type User struct{ 
 	Name string
 	Age int64
@@ -70,7 +71,7 @@ func TestUser_NewUser(t *testing.T){
 		t.Run(tt.name, func(t *testing.T){
 			t.Parallel()
 			out := NewUser(
-				"name001",15,"url001",
+				tt.in.name,tt.in.age,tt.in.url,
 			)
 			assert.Equal(t, tt.out, out)
 		})

@@ -38,7 +38,7 @@ func Test{{ .StructName }}_New{{ .StructName }}(t *testing.T){
 		t.Run(tt.name, func(t *testing.T){
 			t.Parallel()
 			out := New{{ .StructName }}(
-				{{ range $j, $x := .Fields }}{{ $x.TestVar }},{{ end }}
+				{{ range $j, $x := .Fields }}tt.in.{{ $x.ArgName }},{{ end }}
 			)
 			assert.Equal(t, tt.out, out)
 		})
