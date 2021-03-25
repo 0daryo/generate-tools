@@ -27,54 +27,54 @@ Field(if nothing type ! and enter): !
 ```
 
 ```go
-
-type User struct{ 
+type User struct {
 	Name string
-	Age int64
-	URL string
+	Age  int64
+	URL  string
 }
 
 func NewUser(
-	name string, age int64, url string, 
-)User{
-	return User{ 
+	name string, age int64, url string,
+) User {
+	return User{
 		Name: name,
-		Age: age,
-		URL: url,
-  }
+		Age:  age,
+		URL:  url,
+	}
 }
 
-func TestUser_NewUser(t *testing.T){
+func TestUser_NewUser(t *testing.T) {
 	t.Parallel()
-	type in struct{ name string
-		age int64
-		url string
-		
+	type in struct {
+		name string
+		age  int64
+		url  string
 	}
-	tests := []struct{
-		name     string
-		in       in
-		out      User
+	tests := []struct {
+		name string
+		in   in
+		out  User
 	}{
 		{
-			name:    "success",
-			in:    in{ 
-				name: "name001",age: 15,url: "url001",
+			name: "success",
+			in: in{
+				name: "name001", age: 15, url: "url001",
 			},
-			out:   User{ 
-				Name: "name001",Age: 15,URL: "url001",
+			out: User{
+				Name: "name001", Age: 15, URL: "url001",
 			},
 		},
 	}
-	for _,tt :=range tests{
+	for _, tt := range tests {
 		tt := tt
-		t.Run(tt.name, func(t *testing.T){
+		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			out := NewUser(
-				tt.in.name,tt.in.age,tt.in.url,
+				tt.in.name, tt.in.age, tt.in.url,
 			)
 			assert.Equal(t, tt.out, out)
 		})
 	}
 }
+
 ```

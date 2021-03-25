@@ -14,28 +14,42 @@ Usage of ifgen:
 ```
 
 ## Output is like below
+```sh
+pkg name: service
+interface name: interface name: User
+Function Name(if nothing type ! and enter): Get
+Arg(if nothing type ! and enter): id
+Type: string
+Arg(if nothing type ! and enter): !
+Return(if nothing type ! and enter): user
+Type: User
+Return(if nothing type ! and enter): !
+Function Name(if nothing type ! and enter): !
+```
+
 ```go
 package service
 
 type User interface {
 	Get(
-		userID string, 
+		id string,
 	) (
-		User User, 
+		user User,
 	)
 }
 
 type user struct{}
 
-func NewUser()*user {
+func NewUser() *user {
 	return &user{}
 }
 
 func (s *user) Get(
-	userID string, 
+	id string,
 ) (
-	User User, 
+	user User,
 ) {
 	return
 }
+
 ```

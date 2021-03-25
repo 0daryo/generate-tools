@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
+	"go/format"
 	"os"
 	"strings"
 	"text/template"
@@ -47,11 +48,15 @@ func main() {
 	if err := t.Execute(o, info); err != nil {
 		panic(err)
 	}
+	formatted, err := format.Source(o.Bytes())
+	if err != nil {
+		panic(err)
+	}
 	if *pbcopy {
-		clipboard.WriteAll(o.String())
+		clipboard.WriteAll(string(formatted))
 		return
 	}
-	fmt.Fprint(os.Stdout, o)
+	fmt.Fprint(os.Stdout, formatted)
 }
 
 func read() string {
