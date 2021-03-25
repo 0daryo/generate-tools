@@ -26,6 +26,7 @@ type Field struct {
 	Name      string
 	FieldType string
 	ArgName   string
+	TestVar   string
 }
 
 var sc = bufio.NewScanner(os.Stdin)
@@ -70,12 +71,21 @@ func fields() []Field {
 			Name:      field,
 			FieldType: t,
 			ArgName:   toArgName(field),
+			TestVar:   newTestVar(toArgName(field), t),
 		})
 	}
 	return fields
 }
 
+var capitalMap = map[string]bool{
+	"ID":  true,
+	"URL": true,
+}
+
 func toArgName(fieldName string) string {
+	if isCapitalized, ok := capitalMap[fieldName]; ok && isCapitalized {
+		return strings.ToLower(fieldName)
+	}
 	a := strings.ToLower(string(fieldName[0])) + fieldName[1:]
 	return a
 }
@@ -121,4 +131,16 @@ func structCompleter(in prompt.Document) []prompt.Suggest {
 		{Text: "Book"},
 	}
 	return prompt.FilterHasPrefix(s, in.GetWordBeforeCursor(), true)
+}
+
+func newTestVar(arg, t string) string {
+	switch t {
+	case "string":
+		return "\"" + arg + "001\""
+	case "bool":
+		return "true"
+	case "time.Time":
+		return "time.Date(2020,time.August,11,22,33,44,55,time.UTC)"
+	}
+	return "15"
 }

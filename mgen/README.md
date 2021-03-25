@@ -34,12 +34,46 @@ type User struct{
 }
 
 func NewUser(
-	name string, age int64, uRL string, 
+	name string, age int64, url string, 
 )User{
 	return User{ 
 		Name: name,
 		Age: age,
-		URL: uRL,
+		URL: url,
   }
+}
+
+func TestUser_NewUser(t *testing.T){
+	t.Parallel()
+	type in struct{ name string
+		age int64
+		url string
+		
+	}
+	tests := []struct{
+		name     string
+		in       in
+		out      User
+	}{
+		{
+			name:    "success",
+			in:    in{ 
+				name: "name001",age: 15,url: "url001",
+			},
+			out:   User{ 
+				Name: "name001",Age: 15,URL: "url001",
+			},
+		},
+	}
+	for _,tt :=range tests{
+		tt := tt
+		t.Run(tt.name, func(t *testing.T){
+			t.Parallel()
+			out := NewUser(
+				"name001",15,"url001",
+			)
+			assert.Equal(t, tt.out, out)
+		})
+	}
 }
 ```
